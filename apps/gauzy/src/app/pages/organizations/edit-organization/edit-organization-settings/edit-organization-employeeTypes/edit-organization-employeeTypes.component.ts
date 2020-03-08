@@ -1,85 +1,100 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 import { EmployeesService } from '../../../../../@core/services/employees.service';
 import {
 	Employee,
 	Organization,
-	EmployeeTypesCreateInput
+	EmployeeTypesCreateInput,
+	EmployeeType
 } from '@gauzy/models';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, switchMap, tap } from 'rxjs/operators';
 import { OrganizationEditStore } from '../../../../../@core/services/organization-edit-store.service';
 import { OrganizationEmpTypesService } from '../../../../../@core/services/organization-emp-types.service';
+import { NbToastrService } from '@nebular/theme';
+import { TranslateService } from '@ngx-translate/core';
+import { TranslationBaseComponent } from 'apps/gauzy/src/app/@shared/language-base/translation-base.component';
+import { EmployeeTypesStore } from 'apps/gauzy/src/app/@core/services/employee-types-store.service';
 
 @Component({
 	selector: 'ga-edit-org-emptypes',
 	templateUrl: './edit-organization-employeeTypes.component.html'
 })
-export class EditOrganizationEmployeeTypes implements OnInit, OnDestroy {
+export class EditOrganizationEmployeeTypes extends TranslationBaseComponent
+	implements OnInit, OnDestroy {
 	private _ngDestroy$ = new Subject<void>();
-	form: FormGroup;
 	selectedEmployee: Employee;
 	organization: Organization;
-	empTypes: EmployeeTypesCreateInput[];
+	employeeTypes: EmployeeTypesCreateInput[];
+	showAddCard: boolean;
+	empTypes$: Observable<EmployeeType[]>;
 
 	constructor(
-		private fb: FormBuilder,
 		private employeeService: EmployeesService,
 		private organizationEditStore: OrganizationEditStore,
-		private organizationEmpTypesService: OrganizationEmpTypesService
-	) {}
+		private employeeTypesStore: EmployeeTypesStore,
+		private organizationEmpTypesService: OrganizationEmpTypesService,
+		private readonly toastrService: NbToastrService,
+		readonly translateService: TranslateService
+	) {
+		super(translateService);
+	}
 
 	ngOnInit(): void {
-		this._initializeForm();
+		this.empTypes$ = this.employeeTypesStore.employeeTypes$;
+
 		this.organizationEditStore.selectedOrganization$
-			.pipe(takeUntil(this._ngDestroy$))
-			.subscribe((data) => {
-				this.organization = data;
-				if (this.organization) {
-					this.employeeService
-						.getEmpTypes(this.organization.id)
-						.pipe(takeUntil(this._ngDestroy$))
-						.subscribe((types) => {
-							this.empTypes = types;
-						});
-				}
-			});
+			.pipe(
+				tap((organization) => (this.organization = organization)),
+				switchMap(({ id }) => this.employeeService.getEmpTypes(id)),
+
+				tap((empTypes) => this.employeeTypesStore.loadAll(empTypes)),
+				takeUntil(this._ngDestroy$)
+			)
+			.subscribe();
 	}
 
-	private _initializeForm() {
-		this.form = this.fb.group({
-			name: ['', Validators.required]
-		});
-	}
-
-	submitForm() {
-		const name = this.form.controls['name'].value;
+	createEmployeeType(employeeType: string) {
+		// TODO ADD ERROR NOTIFICATION AND ADD VALUE FOR ALL LANGUAGES
 		const newEmpType = {
-			name,
+			name: employeeType,
 			organizationId: this.organization.id
 		};
 		this.employeeService
 			.addEmpType(newEmpType)
 			.pipe(takeUntil(this._ngDestroy$))
 			.subscribe((data) => {
-				this.empTypes.push(data);
+				this.employeeTypesStore.create(data);
+				this.showAddCard = false;
+				this.toastrService.primary(
+					this.getTranslation(
+						'NOTES.ORGANIZATIONS.EDIT_ORGANIZATIONS_EMPLOYEE_TYPES.ADD_EMPLOYEE_TYPE',
+						{
+							name: name
+						}
+					),
+					this.getTranslation('TOASTR.TITLE.SUCCESS')
+				);
 			});
-		this.form.reset();
 	}
 
-	delType(id) {
+	delType(id: number) {
+		// TODO ADD ERROR NOTIFICATION AND ADD VALUE FOR ALL LANGUAGES
 		this.organizationEmpTypesService
 			.delType(id)
 			.pipe(takeUntil(this._ngDestroy$))
-			.subscribe();
-		this.empTypes = this.empTypes.filter((t) => t['id'] !== id);
-	}
-
-	update(empType) {
-		this.organizationEmpTypesService
-			.update(empType)
-			.pipe(takeUntil(this._ngDestroy$))
-			.subscribe();
+			.subscribe(() => {
+				this.employeeTypesStore.delete(id);
+				this.toastrService.primary(
+					this.getTranslation(
+						'NOTES.ORGANIZATIONS.EDIT_ORGANIZATIONS_EMPLOYEE_TYPES.REMOVE_EMPLOYEE_TYPE',
+						{
+							name: name
+						}
+					),
+					this.getTranslation('TOASTR.TITLE.SUCCESS')
+				);
+			});
 	}
 
 	ngOnDestroy() {

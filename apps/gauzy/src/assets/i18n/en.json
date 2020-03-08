@@ -391,6 +391,7 @@
 			"PROJECTS": "Projects",
 			"DEPARTMENT_NAME": "Department name",
 			"POSITION_NAME": "Position name",
+			"EMPLOYEE_TYPES": "Employee types",
 			"NEW_PROJECT": "Add new project",
 			"START_DATE": "Start Date",
 			"END_DATE": "End Date",
@@ -687,6 +688,12 @@
 				"ADD_POSITION": "New position {{ name }} successfully added!",
 				"REMOVE_POSITION": "Position {{ name }} successfully removed!",
 				"INVALID_POSITION_NAME": "Please add a Position name"
+			},
+			"EDIT_ORGANIZATIONS_EMPLOYEE_TYPES": {
+				"ADD_EMPLOYEE_TYPE": "New Employee type {{ name }} successfully added!",
+				"REMOVE_EMPLOYEE_TYPE": "Employee type {{ name }} successfully removed!",
+				"UPDATE_EMPLOYEE_TYPE": "Employee type {{ name }} successfully updated!",
+				"INVALID_EMPLOYEE_TYPE_NAME": "Please add a Employee type name"
 			},
 			"EDIT_ORGANIZATIONS_DEPARTMENTS": {
 				"ADD_DEPARTMENT": "{{ name }} Department successfully added!",

@@ -25,7 +25,6 @@ import { Tag } from '../tags';
 
 @Entity('employee')
 export class Employee extends Base implements IEmployee {
-	
 	@ManyToMany((type) => Tag)
 	@JoinTable({
 		name: 'tags_employee'
@@ -105,9 +104,13 @@ export class Employee extends Base implements IEmployee {
 	})
 	teams?: OrganizationTeams[];
 
-	@ManyToMany((type) => EmployeeTypes, { cascade: true })
-	@JoinTable({
-		name: 'employee_employeeTypes'
-	})
-	empTypes?: EmployeeTypes[];
+	@ManyToMany(
+		(type) => EmployeeTypes,
+		(empTypes) => empTypes.employees,
+		{
+			eager: true
+		}
+	)
+	@JoinTable()
+	employeeTypes?: EmployeeTypes[];
 }

@@ -104,6 +104,7 @@ export class AuthService {
 	}
 
 	async register(input: IUserRegistrationInput): Promise<User> {
+		console.log(input, 'input');
 		const user = this.userService.create({
 			...input.user,
 			...(input.password
@@ -112,6 +113,8 @@ export class AuthService {
 				  }
 				: {})
 		});
+
+		console.log(user, 'user');
 
 		this.emailService.welcomeUser(input.user, input.originalUrl);
 

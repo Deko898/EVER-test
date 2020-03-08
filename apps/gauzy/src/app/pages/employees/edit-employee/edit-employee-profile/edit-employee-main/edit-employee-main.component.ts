@@ -105,7 +105,7 @@ export class EditEmployeeMainComponent implements OnInit, OnDestroy {
 			firstName: [employee.user.firstName, Validators.required],
 			lastName: [employee.user.lastName, Validators.required],
 			imageUrl: [employee.user.imageUrl, Validators.required],
-			empTypes: [['']]
+			employeeTypes: [['']]
 		});
 	}
 

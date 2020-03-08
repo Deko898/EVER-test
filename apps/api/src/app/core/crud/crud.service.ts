@@ -68,6 +68,7 @@ export abstract class CrudService<T extends Base> implements ICrudService<T> {
 		partialEntity: QueryDeepPartialEntity<T>,
 		...options: any[]
 	): Promise<UpdateResult | T> {
+		console.log(partialEntity, 'partial');
 		try {
 			// method getPasswordHash is copied from AuthService
 			// try if can import somehow the service and use its method

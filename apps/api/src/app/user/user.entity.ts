@@ -26,6 +26,7 @@ import {
 import { Base } from '../core/entities/base';
 import { Role } from '../role';
 import { Tenant } from '../tenant/tenant.entity';
+import { EmployeeTypes } from '../employee-types/employee-types.entity';
 
 @Entity('user')
 export class User extends Base implements IUser {
@@ -96,4 +97,11 @@ export class User extends Base implements IUser {
 	@IsOptional()
 	@Column({ length: 500, nullable: true })
 	imageUrl?: string;
+
+	// @ApiPropertyOptional({ type: EmployeeTypes })
+	// @ManyToMany((type) => EmployeeTypes, { cascade: true })
+	// @JoinTable({
+	// 	name: 'user_employeeTypes'
+	// })
+	// empTypes?: EmployeeTypes[];
 }
